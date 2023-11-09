@@ -5,4 +5,9 @@ export default defineNuxtConfig({
   },
   devtools: { enabled: true },
   modules: ["@nuxt/ui", "@nuxtjs/color-mode"],
+  runtimeConfig: {
+    public: {
+      apiUrl: process.env.API_URL || "http://localhost:3000",
+    },
+  },
 });
