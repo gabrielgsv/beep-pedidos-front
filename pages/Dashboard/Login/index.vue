@@ -23,9 +23,18 @@ const loginState = reactive<LoginSchema>({
   password: "",
 });
 
+const loading = ref(false);
+
 function onSubmit(event: FormSubmitEvent<LoginSchema>) {
   const { email, password } = event.data;
-  return login(email, password);
+  loading.value = true;
+  return login(email, password)
+    .then(() => {
+      loading.value = false;
+    })
+    .catch(() => {
+      loading.value = false;
+    });
 }
 </script>
 
@@ -49,7 +58,7 @@ function onSubmit(event: FormSubmitEvent<LoginSchema>) {
         </UFormGroup>
 
         <div class="button">
-          <UButton block type="submit">Entrar</UButton>
+          <UButton block type="submit" :loading="loading">Entrar</UButton>
         </div>
       </UForm>
     </UCard>
