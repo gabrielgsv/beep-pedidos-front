@@ -46,9 +46,12 @@ api()
       </template>
 
       <template #actions-data="{ row }">
-        <UButton color="green" :href="`/dashboard/products/${row.id}`">
-          Editar
-        </UButton>
+        <div class="actions">
+          <UButton color="primary" :href="`/dashboard/products/${row.id}`">
+            Editar
+          </UButton>
+          <UButton color="red">Excluir</UButton>
+        </div>
       </template>
     </UTable>
   </div>
@@ -63,5 +66,10 @@ api()
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
 }
 </style>
