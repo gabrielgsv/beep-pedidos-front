@@ -3,7 +3,8 @@ import api from "~/utils/api";
 export function login(email: string, password: string) {
   const router = useRouter();
   const toast = useToast();
-  const user = useCookie("user");
+  const userToken = useCookie("userToken");
+  const userId = useCookie("userId");
 
   return new Promise((resolve, reject) => {
     api()
@@ -12,9 +13,10 @@ export function login(email: string, password: string) {
         password,
       })
       .then((res) => {
-        user.value = JSON.stringify(res.data);
+        userToken.value = res.data.access_token;
+        userId.value = res.data.userId;
         router.push("/dashboard");
-        resolve();
+        resolve(res.data);
       })
       .catch((err) => {
         console.error(err);

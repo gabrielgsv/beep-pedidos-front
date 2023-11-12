@@ -6,6 +6,7 @@ export default () => {
   return axios.create({
     baseURL: config.public.apiUrl,
     headers: {
+      Authorization: "Bearer " + useCookie("userToken").value,
       "X-Custom-Header": "foobar",
     },
   });

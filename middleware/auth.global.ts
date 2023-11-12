@@ -1,9 +1,9 @@
 export default defineNuxtRouteMiddleware((to, from) => {
-  const user = useCookie("user");
+  const userToken = useCookie("userToken");
   if (
     to.path.includes("/dashboard") &&
     to.path !== "/dashboard/login" &&
-    (!user.value || user.value === "")
+    (!userToken.value || userToken.value === "")
   ) {
     return navigateTo("/dashboard/login");
   }

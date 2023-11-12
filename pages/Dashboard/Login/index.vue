@@ -5,7 +5,7 @@ import { login } from "./services";
 
 import beepPedidosLogo from "~/assets/beep-pedidos.svg";
 
-const user = useCookie("user");
+const userToken = useCookie("userToken");
 
 const loginSchema = z.object({
   email: z.string().min(1, { message: "Email obrigatório" }),
@@ -15,7 +15,7 @@ const loginSchema = z.object({
 type LoginSchema = z.output<typeof loginSchema>;
 
 onMounted(() => {
-  user.value = null;
+  userToken.value = null;
 });
 
 const loginState = reactive<LoginSchema>({
