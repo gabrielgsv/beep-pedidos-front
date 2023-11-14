@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import EditProductModal from "./EditProductModal.vue";
+import CreateProductModal from "./CreateProductModal.vue";
 const userId = useCookie("userId");
 
 let products = ref([]);
@@ -30,8 +32,7 @@ api()
 
 <template>
   <div>
-    <h1>Produtos</h1>
-
+    <CreateProductModal />
     <UTable class="product-table" :rows="products" :columns="columns">
       <template #name-data="{ row }">
         <div class="table-text w-[300px]">{{ row.name }}</div>
@@ -47,9 +48,7 @@ api()
 
       <template #actions-data="{ row }">
         <div class="actions">
-          <UButton color="primary" :href="`/dashboard/products/${row.id}`">
-            Editar
-          </UButton>
+          <EditProductModal :product="row" />
           <UButton color="red">Excluir</UButton>
         </div>
       </template>
