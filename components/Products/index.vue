@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import EditProductModal from "./EditProductModal.vue";
-import CreateProductModal from "./CreateProductModal.vue";
+import CreateProductModal from "./CreateProductModal/index.vue";
 const userId = useCookie("userId");
 
 let products = ref([]);

@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from "@nuxt/ui/dist/runtime/types";
 import { z } from "zod";
+import { createProduct, uploadImage } from "./services";
 
+const toast = useToast();
 const isOpen = ref(false);
+const isLoading = ref(false);
 
 const productSchema = z.object({
   name: z.string().min(1, "Nome obrigatório"),
@@ -32,7 +35,42 @@ const productState = reactive<ProductType>({
 const imagePreview = ref();
 
 function onSubmit(event: FormSubmitEvent<ProductType>) {
-  debugger;
+  function sucess() {
+    isLoading.value = false;
+    isOpen.value = false;
+    toast.add({
+      title: "Sucesso",
+      description: "Produto criado com sucesso",
+      timeout: 8000,
+      color: "green",
+    });
+  }
+
+  function error() {
+    isLoading.value = false;
+    toast.add({
+      title: "Erro",
+      description: "Erro ao criar o produto",
+      color: "red",
+      timeout: 8000,
+    });
+  }
+  isLoading.value = true;
+
+  if (event.data?.image instanceof File) {
+    uploadImage(event.data)
+      .then(({ data }) => {
+        const imageUrl: string = data.data.url;
+        createProduct(event.data, imageUrl)
+          .then(() => sucess())
+          .catch(() => error());
+      })
+      .catch(() => error());
+  } else {
+    createProduct(event.data)
+      .then(() => sucess())
+      .catch(() => error());
+  }
 }
 
 function onFileChange(event: any) {
@@ -65,8 +103,6 @@ function addAdditional() {
     { name: "", value: "" },
   ];
 }
-
-console.log("productState", productState);
 </script>
 
 <template>
@@ -124,23 +160,46 @@ console.log("productState", productState);
             </UFormGroup>
 
             <UFormGroup label="Adicionais">
-              <div v-for="(i, index) in productState.additional">
-                <div class="additional">
+              <div class="additional-container">
+                <div
+                  v-for="(i, index) in productState.additional"
+                  class="additional"
+                  :key="index"
+                >
                   <UFormGroup
-                    class="w-full"
+                    class="w-56"
                     label="Nome"
                     name="additional-name"
+                    v-model="i.name"
                   >
                     <UInput v-model="i.name" />
                   </UFormGroup>
 
                   <UFormGroup
-                    class="w-full"
-                    label="Valor"
+                    class="w-32"
+                    label="Preço"
                     name="additional-value"
                   >
-                    <UInput v-model="i.value" />
+                    <UInput
+                      v-model="i.value"
+                      v-maska
+                      data-maska="0,99"
+                      data-maska-eager
+                      data-maska-reversed
+                      data-maska-tokens="0:\d:multiple|9:\d:optional"
+                    >
+                      <template #leading>
+                        <span>R$</span>
+                      </template>
+                    </UInput>
                   </UFormGroup>
+
+                  <UButton
+                    icon="i-heroicons-trash"
+                    color="red"
+                    class="rounded-full h-[32px] mt-5"
+                    @click="productState.additional.splice(index, 1)"
+                  />
                 </div>
               </div>
 
@@ -148,7 +207,7 @@ console.log("productState", productState);
             </UFormGroup>
           </div>
           <div class="buttons">
-            <UButton type="submit">Adicionar</UButton>
+            <UButton type="submit" :loading="isLoading">Adicionar</UButton>
           </div>
         </UForm>
       </UCard>
@@ -203,6 +262,21 @@ img {
   border-radius: 5px;
 }
 
+.additional-container {
+  max-height: 210px;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.additional-container::-webkit-scrollbar {
+  width: 5px; /* width of the entire scrollbar */
+}
+
+.additional-container::-webkit-scrollbar-thumb {
+  background-color: #8f8f8f; /* color of the scroll thumb */
+  border-radius: 20px; /* roundness of the scroll thumb */
+}
+
 .additional {
   display: flex;
   gap: 20px;
@@ -215,3 +289,4 @@ img {
   justify-content: flex-end;
 }
 </style>
+./services
