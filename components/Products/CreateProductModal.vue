@@ -1,21 +1,22 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from "@nuxt/ui/dist/runtime/types";
 import { z } from "zod";
+
 const isOpen = ref(false);
 
 const productSchema = z.object({
   name: z.string().min(1, "Nome obrigatório"),
   image: z
     .any()
-    .refine((file) => file?.size, "Imagem obrigatória")
-    .refine((file) => file?.size <= 4000000, "Tamanho máximo é 4MB")
+    .refine((file) => !file || file?.size <= 4000000, "Tamanho máximo é 4MB")
     .refine(
-      (file) => file?.type?.includes("image/jpeg", "image/png", "image/jpg"),
+      (file) =>
+        !file || file?.type?.includes("image/jpeg", "image/png", "image/jpg"),
       "Formato inválido"
     ),
-  description: z.string().min(1, "Descrição obrigatória"),
-  // price: z.number().min(1, "Preço obrigatório"),
-  // additional: z.string(),
+  description: z.string(),
+  price: z.string().min(1, "Preço obrigatório"),
+  additional: z.any(),
 });
 
 type ProductType = z.output<typeof productSchema>;
@@ -24,8 +25,8 @@ const productState = reactive<ProductType>({
   name: "",
   image: "",
   description: "",
-  // price: 0,
-  // additional: "",
+  price: "",
+  additional: [],
 });
 
 const imagePreview = ref();
@@ -53,9 +54,19 @@ function onClose() {
   productState.name = "";
   productState.image = "";
   productState.description = "";
+  productState.price = "";
 
   imagePreview.value = "";
 }
+
+function addAdditional() {
+  productState.additional = [
+    ...productState.additional,
+    { name: "", value: "" },
+  ];
+}
+
+console.log("productState", productState);
 </script>
 
 <template>
@@ -71,29 +82,71 @@ function onClose() {
     <UModal v-model="isOpen" @close="onClose">
       <UCard>
         <UForm :schema="productSchema" :state="productState" @submit="onSubmit">
-          <UFormGroup label="Nome" name="name">
-            <UInput v-model="productState.name" />
-          </UFormGroup>
+          <div class="form">
+            <UFormGroup class="w-[65%]" label="Nome" name="name">
+              <UInput v-model="productState.name" />
+            </UFormGroup>
 
-          <UFormGroup label="Imagem" name="image">
-            <div class="label-image">
-              <label for="upload-image">Escolher Imagem</label>
-            </div>
-            <UInput
-              id="upload-image"
-              type="file"
-              class="input-file"
-              accept="image/x-png,image/jpeg"
-              @change="onFileChange"
-            />
+            <UFormGroup class="w-[25%]" label="Preço" name="price">
+              <UInput
+                v-model="productState.price"
+                v-maska
+                data-maska="0,99"
+                data-maska-eager
+                data-maska-reversed
+                data-maska-tokens="0:\d:multiple|9:\d:optional"
+              >
+                <template #leading>
+                  <span>R$</span>
+                </template>
+              </UInput>
+            </UFormGroup>
 
-            <img v-if="imagePreview" :src="imagePreview" alt="image" />
-          </UFormGroup>
+            <UFormGroup class="w-full" label="Imagem" name="image">
+              <div class="image-group">
+                <div class="label-image">
+                  <label for="upload-image">Escolher Imagem</label>
+                </div>
+                <UInput
+                  id="upload-image"
+                  type="file"
+                  class="input-file"
+                  accept="image/x-png,image/jpeg"
+                  @change="onFileChange"
+                />
 
-          <UFormGroup label="Descrição" name="description">
-            <UTextarea v-model="productState.description" />
-          </UFormGroup>
+                <img v-if="imagePreview" :src="imagePreview" alt="image" />
+              </div>
+            </UFormGroup>
 
+            <UFormGroup class="w-full" label="Descrição" name="description">
+              <UTextarea class="w-full" v-model="productState.description" />
+            </UFormGroup>
+
+            <UFormGroup label="Adicionais">
+              <div v-for="(i, index) in productState.additional">
+                <div class="additional">
+                  <UFormGroup
+                    class="w-full"
+                    label="Nome"
+                    name="additional-name"
+                  >
+                    <UInput v-model="i.name" />
+                  </UFormGroup>
+
+                  <UFormGroup
+                    class="w-full"
+                    label="Valor"
+                    name="additional-value"
+                  >
+                    <UInput v-model="i.value" />
+                  </UFormGroup>
+                </div>
+              </div>
+
+              <UButton icon="i-heroicons-plus" @click="addAdditional" />
+            </UFormGroup>
+          </div>
           <div class="buttons">
             <UButton type="submit">Adicionar</UButton>
           </div>
@@ -104,9 +157,22 @@ function onClose() {
 </template>
 
 <style scoped>
+.form {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 10px;
+  gap: 20px;
+}
 .added-button {
   float: right;
   margin: 30px;
+}
+
+.image-group {
+  display: flex;
+  justify-content: space-between;
+  width: 90%;
+  min-height: 50px;
 }
 
 .input-file {
@@ -120,12 +186,27 @@ function onClose() {
   background-color: #3b82f6;
   text-align: center;
   padding: 7px;
-  color: #f1f1f1;
+  color: #ffffff;
+  font-weight: 500;
   border-radius: 8px;
 }
 
 .label-image label {
   cursor: pointer;
+}
+
+img {
+  max-width: 150px;
+  max-height: 150px;
+  align-self: flex-start;
+  border: 3px solid #3b82f6;
+  border-radius: 5px;
+}
+
+.additional {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 10px;
 }
 
 .buttons {
