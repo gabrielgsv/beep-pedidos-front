@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import EditProductModal from "./EditProductModal.vue";
 import CreateProductModal from "./CreateProductModal/index.vue";
-const userId = useCookie("userId");
+import DeleteProductModal from "./DeleteProductModal/index.vue";
+import { useProductsStore } from "~/stores/products.store";
+import { getProducts } from "./services";
+const store = useProductsStore();
 
-let products = ref([]);
 const columns = ref([
   {
     key: "name",
@@ -23,17 +24,22 @@ const columns = ref([
   },
 ]);
 
-api()
-  .get(`products/${userId.value}`)
-  .then((res) => {
-    products.value = res.data;
-  });
+getProducts();
 </script>
 
 <template>
   <div>
     <CreateProductModal />
-    <UTable class="product-table" :rows="products" :columns="columns">
+    <UTable
+      class="product-table"
+      :rows="store.products"
+      :columns="columns"
+      :loading-state="{
+        icon: 'i-heroicons-arrow-path-20-solid',
+        label: 'Carregando...',
+      }"
+      :loading="store.loading"
+    >
       <template #name-data="{ row }">
         <div class="table-text w-[300px]">{{ row.name }}</div>
       </template>
@@ -48,8 +54,8 @@ api()
 
       <template #actions-data="{ row }">
         <div class="actions">
-          <EditProductModal :product="row" />
-          <UButton color="red">Excluir</UButton>
+          <CreateProductModal :is-editing="true" :product="row" />
+          <DeleteProductModal :product="row" />
         </div>
       </template>
     </UTable>

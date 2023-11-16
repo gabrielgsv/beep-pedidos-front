@@ -1,7 +1,24 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from "@nuxt/ui/dist/runtime/types";
 import { z } from "zod";
+import { getProducts } from "../services";
 import { createProduct, uploadImage } from "./services";
+
+type PropsType = {
+  isEditing?: boolean;
+  product?: {
+    id: number;
+    name: string;
+    image_url: string;
+    description: string;
+    price: number;
+    additional: {
+      name: string;
+      value: number;
+    }[];
+  };
+};
+const props = defineProps<PropsType>();
 
 const toast = useToast();
 const isOpen = ref(false);
@@ -32,12 +49,29 @@ const productState = reactive<ProductType>({
   additional: [],
 });
 
+const productId = ref(props.product?.id);
+
+function onOpenEditing() {
+  if (props.isEditing && props.product) {
+    productState.name = props.product.name;
+    productState.image = props.product.image_url;
+    productState.description = props.product.description;
+    productState.price = props.product.price.toString();
+    productState.additional = props.product.additional;
+
+    imagePreview.value = props.product.image_url;
+  }
+
+  isOpen.value = true;
+}
+
 const imagePreview = ref();
 
 function onSubmit(event: FormSubmitEvent<ProductType>) {
   function sucess() {
     isLoading.value = false;
     isOpen.value = false;
+    getProducts();
     toast.add({
       title: "Sucesso",
       description: "Produto criado com sucesso",
@@ -108,6 +142,14 @@ function addAdditional() {
 <template>
   <div>
     <UButton
+      v-if="props.isEditing"
+      color="primary"
+      @click="onOpenEditing"
+      label="Editar"
+    />
+
+    <UButton
+      v-else
       label="Adicionar Produto"
       class="added-button"
       color="primary"
