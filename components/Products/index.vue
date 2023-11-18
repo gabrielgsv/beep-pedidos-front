@@ -25,14 +25,24 @@ const columns = ref([
 ]);
 
 getProducts();
+
+const page = ref(1);
+const pageCount = 10;
+
+const rows = computed(() => {
+  return store.products.slice(
+    (page.value - 1) * pageCount,
+    page.value * pageCount
+  );
+});
 </script>
 
 <template>
   <div>
-    <CreateProductModal />
+    <CreateProductModal :is-editing="false" />
     <UTable
       class="product-table"
-      :rows="store.products"
+      :rows="rows"
       :columns="columns"
       :loading-state="{
         icon: 'i-heroicons-arrow-path-20-solid',
@@ -59,6 +69,15 @@ getProducts();
         </div>
       </template>
     </UTable>
+    <div
+      class="flex justify-end px-3 py-3.5 border-t border-gray-200 dark:border-gray-700"
+    >
+      <UPagination
+        v-model="page"
+        :page-count="pageCount"
+        :total="store.products.length"
+      />
+    </div>
   </div>
 </template>
 

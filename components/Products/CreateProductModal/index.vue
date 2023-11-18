@@ -3,6 +3,7 @@ import type { FormSubmitEvent } from "@nuxt/ui/dist/runtime/types";
 import { z } from "zod";
 import { getProducts } from "../services";
 import { createProduct, uploadImage } from "./services";
+import convertCurrency from "~/utils/convertCurrency";
 
 type PropsType = {
   isEditing?: boolean;
@@ -31,7 +32,7 @@ const productSchema = z.object({
     .refine((file) => !file || file?.size <= 4000000, "Tamanho máximo é 4MB")
     .refine(
       (file) =>
-        !file || file?.type?.includes("image/jpeg", "image/png", "image/jpg"),
+        !file || file?.type === "image/jpeg" || "image/png" || "image/jpg",
       "Formato inválido"
     ),
   description: z.string(),
@@ -53,11 +54,18 @@ const productId = ref(props.product?.id);
 
 function onOpenEditing() {
   if (props.isEditing && props.product) {
+    const newAdditionals = props.product.additional.map((additional) => {
+      return {
+        ...additional,
+        value: convertCurrency(additional.value),
+      };
+    });
+
     productState.name = props.product.name;
     productState.image = props.product.image_url;
     productState.description = props.product.description;
-    productState.price = props.product.price.toString();
-    productState.additional = props.product.additional;
+    productState.price = convertCurrency(props.product.price);
+    productState.additional = newAdditionals;
 
     imagePreview.value = props.product.image_url;
   }
@@ -95,13 +103,13 @@ function onSubmit(event: FormSubmitEvent<ProductType>) {
     uploadImage(event.data)
       .then(({ data }) => {
         const imageUrl: string = data.data.url;
-        createProduct(event.data, imageUrl)
+        createProduct(event.data, props.isEditing, productId.value, imageUrl)
           .then(() => sucess())
           .catch(() => error());
       })
       .catch(() => error());
   } else {
-    createProduct(event.data)
+    createProduct(event.data, props.isEditing)
       .then(() => sucess())
       .catch(() => error());
   }
@@ -110,7 +118,7 @@ function onSubmit(event: FormSubmitEvent<ProductType>) {
 function onFileChange(event: any) {
   const file = event?.target.files[0];
   if (!file) return;
-
+  debugger;
   productState.image = file;
 
   const reader = new FileReader();
@@ -157,7 +165,7 @@ function addAdditional() {
       icon="i-heroicons-plus"
     />
 
-    <UModal v-model="isOpen" @close="onClose">
+    <UModal v-model="isOpen" @close="onClose" :ui="{ width: 'sm:max-w-2xl' }">
       <UCard>
         <UForm :schema="productSchema" :state="productState" @submit="onSubmit">
           <div class="form">
@@ -249,7 +257,10 @@ function addAdditional() {
             </UFormGroup>
           </div>
           <div class="buttons">
-            <UButton type="submit" :loading="isLoading">Adicionar</UButton>
+            <UButton color="red" @click="isOpen = false" :loading="isLoading">
+              Cancelar
+            </UButton>
+            <UButton type="submit" :loading="isLoading">Salvar</UButton>
           </div>
         </UForm>
       </UCard>
@@ -329,6 +340,7 @@ img {
   margin-top: 20px;
   display: flex;
   justify-content: flex-end;
+  gap: 10px;
 }
 </style>
 ./services
