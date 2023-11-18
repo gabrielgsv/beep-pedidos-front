@@ -4,7 +4,7 @@ export default defineNuxtConfig({
     preference: "light",
   },
   devtools: { enabled: true },
-  modules: ["@nuxt/ui", "@nuxtjs/color-mode"],
+  modules: ["@nuxt/ui", "@nuxtjs/color-mode", "@pinia/nuxt"],
   runtimeConfig: {
     public: {
       apiUrl: process.env.API_URL || "http://localhost:3000",
