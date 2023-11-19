@@ -8,11 +8,18 @@ const settingSchemna = z.object({
   url: z.string().min(1, { message: "Url obrigatório" }),
   cep: z.string(),
   addreas: z.string().min(1, { message: "Endereço obrigatório" }),
-  address_number: z.number().min(1, { message: "Número obrigatório" }),
+  address_number: z.string().min(1, { message: "Número obrigatório" }),
   neighborhood: z.string().min(1, { message: "Bairro obrigatório" }),
   city: z.string().min(1, { message: "Cidade obrigatório" }),
   state: z.string().min(1, { message: "Estado obrigatório" }),
-  image_url: z.string().min(1, { message: "Logo obrigatório" }),
+  image: z
+    .any()
+    .refine((file) => !file || file?.size <= 4000000, "Tamanho máximo é 4MB")
+    .refine(
+      (file) =>
+        !file || file?.type === "image/jpeg" || "image/png" || "image/jpg",
+      "Formato inválido"
+    ),
 });
 
 type SettingsType = z.output<typeof settingSchemna>;
@@ -22,12 +29,14 @@ const settingState = reactive<SettingsType>({
   url: "",
   cep: "",
   addreas: "",
-  address_number: 0,
+  address_number: "",
   neighborhood: "",
   city: "",
   state: "",
-  image_url: "",
+  image: "",
 });
+
+const imagePreview = ref();
 
 function onSubmit(event: FormSubmitEvent<SettingsType>) {
   debugger;
@@ -49,50 +58,126 @@ watch(
     }
   }
 );
+
+function onFileChange(event: any) {
+  const file = event?.target.files[0];
+  if (!file) return;
+  settingState.image = file;
+
+  const reader = new FileReader();
+
+  reader.onload = () => {
+    imagePreview.value = reader.result;
+  };
+
+  reader.readAsDataURL(file);
+}
 </script>
 
 <template>
   <div>
-    <h1>Settings</h1>
-
     <UForm :schema="settingSchemna" :state="settingState" @submit="onSubmit">
-      <UFormGroup label="Nome" name="name">
-        <UInput v-model="settingState.name" />
-      </UFormGroup>
+      <div class="form-container">
+        <UFormGroup label="Nome" name="name" class="w-72">
+          <UInput v-model="settingState.name" />
+        </UFormGroup>
 
-      <UFormGroup label="Url" name="url">
-        <UInput v-model="settingState.url" />
-      </UFormGroup>
+        <UFormGroup label="Url" name="url" class="w-52">
+          <UInput v-model="settingState.url" />
+        </UFormGroup>
 
-      <UFormGroup label="Logo" name="image_url">
-        <UInput v-model="settingState.image_url" />
-      </UFormGroup>
+        <UFormGroup label="CEP" name="cep" class="w-52">
+          <UInput v-model="settingState.cep" v-maska data-maska="#####-###" />
+        </UFormGroup>
 
-      <UFormGroup label="CEP" name="cep">
-        <UInput v-model="settingState.cep" v-maska data-maska="#####-###" />
-      </UFormGroup>
+        <UFormGroup label="Cidade" name="city" class="w-52">
+          <UInput v-model="settingState.city" />
+        </UFormGroup>
 
-      <UFormGroup label="Cidade" name="city">
-        <UInput v-model="settingState.city" />
-      </UFormGroup>
+        <UFormGroup label="Estado" name="state" class="w-20">
+          <UInput v-model="settingState.state" />
+        </UFormGroup>
 
-      <UFormGroup label="Estado" name="state">
-        <UInput v-model="settingState.state" />
-      </UFormGroup>
+        <UFormGroup label="Endereço" name="addreas" class="w-80">
+          <UInput v-model="settingState.addreas" />
+        </UFormGroup>
 
-      <UFormGroup label="Endereço" name="addreas">
-        <UInput v-model="settingState.addreas" />
-      </UFormGroup>
+        <UFormGroup label="Bairro" name="neighborhood" class="w-52">
+          <UInput v-model="settingState.neighborhood" />
+        </UFormGroup>
 
-      <UFormGroup label="Bairro" name="neighborhood">
-        <UInput v-model="settingState.neighborhood" />
+        <UFormGroup label="Número" name="address_number" class="w-24">
+          <UInput
+            v-model="settingState.address_number"
+            v-maska
+            data-maska="#####"
+          />
+        </UFormGroup>
+      </div>
+      <UFormGroup class="w-full ml-[40px] mt-7" label="Logo" name="image">
+        <div class="image-group">
+          <div class="label-image">
+            <label for="upload-image">
+              <img
+                v-if="imagePreview"
+                :src="imagePreview"
+                alt="image"
+                class="mb-5"
+              />
+              {{ imagePreview ? "Alterar imagem" : "Selecionar imagem" }}
+            </label>
+          </div>
+          <UInput
+            id="upload-image"
+            type="file"
+            class="input-file"
+            accept="image/x-png,image/jpeg"
+            @change="onFileChange"
+          />
+        </div>
       </UFormGroup>
-
-      <UFormGroup label="Número" name="address_number">
-        <UInput v-model="settingState.address_number" />
-      </UFormGroup>
+      <div class="buttons">
+        <UButton type="submit" size="xl">Salvar</UButton>
+      </div>
     </UForm>
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.form-container {
+  margin-top: 50px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-left: 40px;
+}
+.image-group {
+  display: flex;
+  justify-content: space-between;
+  width: 90%;
+  min-height: 50px;
+}
+
+.input-file {
+  display: none;
+}
+
+.label-image {
+  cursor: pointer;
+  width: 200px;
+  text-align: center;
+  border: 2px solid #d1d5db;
+  padding: 10px;
+  font-weight: 500;
+  border-radius: 8px;
+}
+
+label {
+  cursor: pointer;
+}
+
+.buttons {
+  float: right;
+  margin-right: 50px;
+}
+</style>
