@@ -2,6 +2,7 @@
 import type { FormSubmitEvent } from "@nuxt/ui/dist/runtime/types";
 import axios from "axios";
 import { z } from "zod";
+import { getUserById } from "./services";
 
 const settingSchemna = z.object({
   name: z.string().min(1, { message: "Nome obrigatório" }),
@@ -65,6 +66,30 @@ const settingState = reactive<SettingsType>({
 
 const imagePreview = ref();
 
+onMounted(() => {
+  getUserById()
+    .then(({ data }) => {
+      settingState.name = data.name;
+      settingState.url = data.url;
+      settingState.phone = data.phone;
+      settingState.cpf_cnpj = data.cpf_cnpj;
+      settingState.cep = data.cep;
+      settingState.addreas = data.addreas;
+      settingState.address_number = data.address_number;
+      settingState.neighborhood = data.neighborhood;
+      settingState.city = data.city;
+      settingState.state = data.state;
+      settingState.complement = data.complement;
+      settingState.delivery_fee = convertCurrency(data.delivery_fee);
+      settingState.delivery_time = data.delivery_time.toString();
+      settingState.timetables = data.timetables;
+      settingState.image = data.image;
+    })
+    .catch((error) => {
+      debugger;
+    });
+});
+
 function onSubmit(event: FormSubmitEvent<SettingsType>) {
   debugger;
 }
@@ -74,7 +99,7 @@ console.log("settingState", settingState.cep);
 watch(
   () => settingState.cep,
   (value) => {
-    if (value.length === 9) {
+    if (value?.length === 9) {
       const cep = Number(value.replace("-", ""));
       axios.get(`https://viacep.com.br/ws/${cep}/json/`).then(({ data }) => {
         settingState.addreas = data.logradouro;
