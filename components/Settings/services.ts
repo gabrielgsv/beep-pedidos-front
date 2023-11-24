@@ -4,7 +4,7 @@ type UserType = {
   phone: string;
   cpf_cnpj: string;
   cep: string;
-  addreas: string;
+  address: string;
   address_number: string;
   neighborhood: string;
   city: string;
@@ -26,19 +26,22 @@ export function getUserById() {
   return api().get(`/users/by-id?id=${id.value}`);
 }
 
-export function updateUser(user: UserType) {
+export function updateUser(user: UserType, imageUrl?: string) {
   const userId = useCookie("userId");
   return api().patch("/users", {
     ...user,
     id: userId.value,
     address_number: parseInt(user.address_number),
     delivery_fee: parseFloat(user.delivery_fee.replace(",", ".")),
+    delivery_time: parseInt(user.delivery_time),
+    image_url: imageUrl,
+    image: undefined,
   });
 }
 
 export function uploadImage(product: UserType) {
   return api().post(
-    "/products/image-upload",
+    "/image-upload",
     {
       file: product.image,
     },
