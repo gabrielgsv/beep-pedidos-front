@@ -55,7 +55,14 @@ const rows = computed(() => {
       </template>
 
       <template #price-data="{ row }">
-        <div class="table-text w-[70px]">{{ row.price }}</div>
+        <div class="table-text w-[100px]">
+          {{
+            row.price.toLocaleString("pt-br", {
+              style: "currency",
+              currency: "BRL",
+            })
+          }}
+        </div>
       </template>
 
       <template #description-data="{ row }">
