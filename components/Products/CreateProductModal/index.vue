@@ -102,7 +102,7 @@ function onSubmit(event: FormSubmitEvent<ProductType>) {
   if (event.data?.image instanceof File) {
     uploadImage(event.data)
       .then(({ data }) => {
-        const imageUrl: string = data.data.url;
+        const imageUrl: string = data.data.link;
         createProduct(event.data, props.isEditing, productId.value, imageUrl)
           .then(() => sucess())
           .catch(() => error());
@@ -118,7 +118,6 @@ function onSubmit(event: FormSubmitEvent<ProductType>) {
 function onFileChange(event: any) {
   const file = event?.target.files[0];
   if (!file) return;
-  debugger;
   productState.image = file;
 
   const reader = new FileReader();
@@ -165,7 +164,12 @@ function addAdditional() {
       icon="i-heroicons-plus"
     />
 
-    <UModal v-model="isOpen" @close="onClose" :ui="{ width: 'sm:max-w-2xl' }">
+    <UModal
+      v-model="isOpen"
+      @close="onClose"
+      :ui="{ width: 'sm:max-w-2xl' }"
+      prevent-close
+    >
       <UCard>
         <UForm :schema="productSchema" :state="productState" @submit="onSubmit">
           <div class="form">
@@ -190,9 +194,9 @@ function addAdditional() {
 
             <UFormGroup class="w-full" label="Imagem" name="image">
               <div class="image-group">
-                <div class="label-image">
-                  <label for="upload-image">Escolher Imagem</label>
-                </div>
+                <label for="upload-image">
+                  <div class="label-image">Escolher Imagem</div>
+                </label>
                 <UInput
                   id="upload-image"
                   type="file"

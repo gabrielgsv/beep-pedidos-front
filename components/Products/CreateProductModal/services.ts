@@ -48,7 +48,7 @@ export function createProduct(
 
 export function uploadImage(product: ProductType) {
   return api().post(
-    "/products/image-upload",
+    "/image-upload",
     {
       file: product.image,
     },
