@@ -16,16 +16,18 @@ export type UserType = {
   delivery_time: number;
   complement: string;
   image_url: string;
-  products: {
-    id: number;
+  products: ProductsType[];
+};
+
+export type ProductsType = {
+  id: number;
+  name: string;
+  image_url: string;
+  description: string;
+  price: number;
+  additional: {
     name: string;
-    image_url: string;
-    description: string;
-    price: number;
-    additional: {
-      name: string;
-      value: number;
-    }[];
-    user_id: number;
+    value: number;
   }[];
+  user_id: number;
 };
