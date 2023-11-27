@@ -52,7 +52,7 @@ const selectedProduct = ref<ProductsType | null>(null);
       </div>
     </div>
     <UModal v-model="isOpenModal" prevent-close>
-      <UCard>
+      <UCard class="modal-card">
         <template #header>
           <div class="flex">
             <p class="product-name">
@@ -94,14 +94,12 @@ const selectedProduct = ref<ProductsType | null>(null);
             </div>
           </div>
           <UTextarea class="w-full" placeholder="Observações" />
-        </div>
-        <template #footer>
-          <div class="flex justify-between">
+          <div class="add-button">
             <UButton size="xl" block>
               Adicionar {{ convertToMoneyString(selectedProduct?.price) }}
             </UButton>
           </div>
-        </template>
+        </div>
       </UCard>
     </UModal>
   </div>
@@ -115,13 +113,17 @@ const selectedProduct = ref<ProductsType | null>(null);
   font-weight: 600;
 }
 
+.modal-card {
+  height: 100vh;
+  margin-bottom: 40px;
+}
+
 .modal-content {
   display: flex;
   overflow-y: auto;
   flex-direction: column;
   align-items: center;
   width: 100%;
-  max-height: 75vh;
 }
 
 .product-description {
@@ -133,5 +135,16 @@ const selectedProduct = ref<ProductsType | null>(null);
   font-size: 0.75rem;
   line-height: 1rem;
   text-overflow: ellipsis;
+}
+
+.add-button {
+  width: 100vw;
+  position: fixed;
+  bottom: 0px;
+}
+
+.add-button button {
+  border-radius: 0;
+  height: 60px;
 }
 </style>
