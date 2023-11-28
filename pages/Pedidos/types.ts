@@ -28,6 +28,7 @@ export type ProductsType = {
   additional: {
     name: string;
     value: number;
+    count: number;
   }[];
   user_id: number;
 };

@@ -10,6 +10,7 @@ type ProductsType = {
   additional: {
     name: string;
     value: number;
+    count: number;
   }[];
   user_id: number;
 };
@@ -21,6 +22,8 @@ type PropsType = {
 const props = defineProps<PropsType>();
 const isOpenModal = ref(false);
 const selectedProduct = ref<ProductsType | null>(null);
+
+const { addProduct } = useOrdersStore();
 </script>
 
 <template>
@@ -28,7 +31,15 @@ const selectedProduct = ref<ProductsType | null>(null);
     v-for="product in props?.products"
     class="product"
     @click="
-      selectedProduct = product;
+      selectedProduct = {
+        ...product,
+        additional: product.additional.map((item) => {
+          return {
+            ...item,
+            count: 0,
+          };
+        }),
+      };
       isOpenModal = true;
     "
   >
@@ -84,18 +95,49 @@ const selectedProduct = ref<ProductsType | null>(null);
                 <p class="font-bold">{{ additional.name }}</p>
                 <p>{{ convertToMoneyString(additional.value) }}</p>
               </div>
-              <div>
+              <div class="additional-count">
+                <UButton
+                  v-if="additional.count > 0"
+                  class="rounded-full"
+                  icon="i-heroicons-minus"
+                  color="red"
+                  variant="ghost"
+                  @click="
+                    () => {
+                      additional.count--;
+                    }
+                  "
+                />
+                {{ additional.count }}
                 <UButton
                   class="rounded-full"
                   icon="i-heroicons-plus"
                   variant="ghost"
+                  @click="
+                    () => {
+                      additional.count++;
+                    }
+                  "
                 />
               </div>
             </div>
           </div>
           <UTextarea class="w-full" placeholder="Observações" />
           <div class="add-button">
-            <UButton size="xl" block>
+            <UButton
+              size="xl"
+              block
+              @click="
+                addProduct({
+                  productId: selectedProduct?.id || 0,
+                  productName: selectedProduct?.name || '',
+                  price: selectedProduct?.price || 0,
+                  subtotal: 0,
+                  additional: selectedProduct?.additional || [],
+                });
+                isOpenModal = false;
+              "
+            >
               Adicionar {{ convertToMoneyString(selectedProduct?.price) }}
             </UButton>
           </div>
@@ -146,5 +188,11 @@ const selectedProduct = ref<ProductsType | null>(null);
 .add-button button {
   border-radius: 0;
   height: 60px;
+}
+
+.additional-count {
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 </style>

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import OrderBag from "~/components/OrderProduct/OrderBag.vue";
 import { type UserType } from "./types";
 const route = useRoute();
 
@@ -42,6 +43,7 @@ onMounted(() => {
       <OrderProduct v-if="user" :products="user.products" />
     </div>
   </div>
+  <OrderBag />
 </template>
 
 <style scoped>
