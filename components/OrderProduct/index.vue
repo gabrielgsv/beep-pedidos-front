@@ -24,6 +24,22 @@ const isOpenModal = ref(false);
 const selectedProduct = ref<ProductsType | null>(null);
 
 const { addProduct } = useOrdersStore();
+const subtotal = ref(0);
+
+watch(
+  () => selectedProduct.value?.price,
+  () => {
+    subtotal.value = selectedProduct.value?.price || 0;
+  }
+);
+
+function addAdditionalToSubTotal() {
+  selectedProduct.value?.additional.forEach((additional) => {
+    subtotal.value = selectedProduct.value?.price || 0;
+    subtotal.value += additional.value * additional.count;
+  });
+  debugger;
+}
 </script>
 
 <template>
@@ -105,6 +121,7 @@ const { addProduct } = useOrdersStore();
                   @click="
                     () => {
                       additional.count--;
+                      addAdditionalToSubTotal();
                     }
                   "
                 />
@@ -116,6 +133,7 @@ const { addProduct } = useOrdersStore();
                   @click="
                     () => {
                       additional.count++;
+                      addAdditionalToSubTotal();
                     }
                   "
                 />
@@ -138,7 +156,7 @@ const { addProduct } = useOrdersStore();
                 isOpenModal = false;
               "
             >
-              Adicionar {{ convertToMoneyString(selectedProduct?.price) }}
+              Adicionar {{ convertToMoneyString(subtotal) }}
             </UButton>
           </div>
         </div>

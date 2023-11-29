@@ -11,39 +11,46 @@ type ProductsOrdersType = {
 };
 
 type OrdersType = {
+  name: string;
+  phone: string;
   paymentType: string;
   total: number;
+  change?: string;
 };
 
 export const useOrdersStore = defineStore("orders", {
   state: (): {
-    orders: OrdersType[];
+    orders: OrdersType;
     productsOrders: ProductsOrdersType[];
   } => ({
-    orders: [],
+    orders: {
+      paymentType: "",
+      name: "",
+      phone: "",
+      total: 0,
+      change: "R$ 0,00",
+    },
     productsOrders: [],
   }),
 
   actions: {
     addProduct(product: ProductsOrdersType) {
       let subtotal: number = product.price;
+      let total: number = 0;
       product.additional.forEach((additional) => {
         subtotal += additional.value * additional.count;
       });
 
       this.productsOrders.push({ ...product, subtotal });
-    },
-  },
-
-  getters: {
-    getTotalOrders: (state) => {
-      let total: number = 0;
-      state.productsOrders.forEach((product) => {
+      this.productsOrders.forEach((product) => {
         total += product.subtotal;
       });
-
-      debugger;
-      return total;
+      this.orders = {
+        paymentType: "Cartão de Crédito",
+        name: "",
+        phone: "",
+        total: total,
+      };
     },
   },
 });
