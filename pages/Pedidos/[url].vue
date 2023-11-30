@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import OrderBag from "~/components/OrderProduct/OrderBag.vue";
+import OrderBag from "~/components/OrderProduct/OrderBag/index.vue";
 import { type UserType } from "./types";
 const route = useRoute();
 

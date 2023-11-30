@@ -16,6 +16,13 @@ type OrdersType = {
   paymentType: string;
   total: number;
   change?: string;
+  cep?: string;
+  address?: string;
+  address_number?: number;
+  neighborhood?: string;
+  city?: string;
+  state?: string;
+  complement?: string;
 };
 
 export const useOrdersStore = defineStore("orders", {

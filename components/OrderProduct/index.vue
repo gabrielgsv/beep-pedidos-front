@@ -21,7 +21,15 @@ type PropsType = {
 
 const props = defineProps<PropsType>();
 const isOpenModal = ref(false);
-const selectedProduct = ref<ProductsType | null>(null);
+const selectedProduct = ref<ProductsType>({
+  id: 0,
+  name: "",
+  image_url: "",
+  description: "",
+  price: 0,
+  additional: [],
+  user_id: 0,
+});
 
 const { addProduct } = useOrdersStore();
 const subtotal = ref(0);
@@ -90,7 +98,7 @@ function addAdditionalToSubTotal() {
             <UButton
               @click="isOpenModal = false"
               color="red"
-              class="rounded-full"
+              class="rounded-full w-8 h-8"
               icon="i-heroicons-x-mark"
             />
           </div>
@@ -98,7 +106,7 @@ function addAdditionalToSubTotal() {
 
         <div class="modal-content">
           <img
-            class="rounded-xl h-60"
+            class="rounded-xl h-40"
             :src="selectedProduct?.image_url"
             alt="Imagem do produto"
           />
@@ -142,27 +150,26 @@ function addAdditionalToSubTotal() {
               </div>
             </div>
           </div>
-          <UTextarea class="w-full" placeholder="Observações" />
-          <div class="add-button">
-            <UButton
-              size="xl"
-              block
-              @click="
-                addProduct({
-                  productId: selectedProduct?.id || 0,
-                  productName: selectedProduct?.name || '',
-                  price: selectedProduct?.price || 0,
-                  subtotal: 0,
-                  additional: selectedProduct?.additional || [],
-                });
-                isOpenModal = false;
-              "
-            >
-              Adicionar {{ convertToMoneyString(subtotal) }}
-            </UButton>
-          </div>
         </div>
       </UCard>
+      <div class="add-button">
+        <UButton
+          size="xl"
+          block
+          @click="
+            addProduct({
+              productId: selectedProduct?.id || 0,
+              productName: selectedProduct?.name || '',
+              price: selectedProduct?.price || 0,
+              subtotal: 0,
+              additional: selectedProduct?.additional || [],
+            });
+            isOpenModal = false;
+          "
+        >
+          Adicionar {{ convertToMoneyString(subtotal) }}
+        </UButton>
+      </div>
     </UModal>
   </div>
 </template>
@@ -176,8 +183,10 @@ function addAdditionalToSubTotal() {
 }
 
 .modal-card {
-  height: 100vh;
-  margin-bottom: 40px;
+  border: none;
+  box-shadow: none;
+  height: 75vh;
+  overflow-y: auto;
 }
 
 .modal-content {
@@ -200,8 +209,8 @@ function addAdditionalToSubTotal() {
 }
 
 .add-button {
-  width: 100vw;
-  position: fixed;
+  width: 100%;
+  /* position: fixed; */
   bottom: 0px;
 }
 

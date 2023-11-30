@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AddressForm from "./AddressForm.vue";
 import type { FormSubmitEvent } from "@nuxt/ui/dist/runtime/types";
 import { z } from "zod";
 
@@ -47,7 +48,7 @@ function onSubmit(event: FormSubmitEvent<any>) {
             <p>{{ products.productName }}</p>
             <p>{{ convertToMoneyString(products.subtotal) }}</p>
           </div>
-          <UButton block variant="outline" @click="isModalOpen = false"
+          <UButton block variant="soft" @click="isModalOpen = false"
             >Adicionar mais itens</UButton
           >
           <div class="item">
@@ -61,6 +62,9 @@ function onSubmit(event: FormSubmitEvent<any>) {
             <UToggle v-model="isDelivery" />
             <p>{{ isDelivery ? "Entrega" : "Retirada" }}</p>
           </div>
+
+          <AddressForm />
+
           <UFormGroup label="Nome Completo" name="name" required>
             <UInput v-model="ordersStore.orders.name" />
           </UFormGroup>
