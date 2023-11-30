@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { FormSubmitEvent } from "@nuxt/ui/dist/runtime/types";
 import { z } from "zod";
 
 const ordersStore = useOrdersStore();
@@ -9,10 +10,13 @@ const isDelivery = ref(true);
 const orderSchema = z.object({
   name: z.string().min(1, { message: "Nome obrigatório" }),
   phone: z.string().min(1, { message: "Número do celular obrigatório" }),
-  paymentType: z.string().min(1, { message: "Tipo de pagamento obrigatório" }),
+  paymentType: z.string().min(1, { message: "Meio de pagamento obrigatório" }),
 });
 
-console.log("ordersStore", ordersStore.orders);
+function onSubmit(event: FormSubmitEvent<any>) {
+  const { orders, productsOrders } = ordersStore;
+  debugger;
+}
 </script>
 
 <template>
@@ -29,7 +33,11 @@ console.log("ordersStore", ordersStore.orders);
           />
         </div>
       </template>
-      <UForm :schema="orderSchema" :state="ordersStore.orders">
+      <UForm
+        :schema="orderSchema"
+        :state="ordersStore.orders"
+        @submit="onSubmit"
+      >
         <div class="container">
           <div class="item">
             <p class="font-semibold">Itens</p>
@@ -53,7 +61,7 @@ console.log("ordersStore", ordersStore.orders);
             <UToggle v-model="isDelivery" />
             <p>{{ isDelivery ? "Entrega" : "Retirada" }}</p>
           </div>
-          <UFormGroup label="Nome Complemento" name="name" required>
+          <UFormGroup label="Nome Completo" name="name" required>
             <UInput v-model="ordersStore.orders.name" />
           </UFormGroup>
 
@@ -64,7 +72,7 @@ console.log("ordersStore", ordersStore.orders);
               data-maska="['(##) ####-####', '(##) #####-####']"
             />
           </UFormGroup>
-          <UFormGroup label="Número do celular" name="paymentType" required>
+          <UFormGroup label="Meio de pagamento" name="paymentType" required>
             <URadioGroup
               v-model="ordersStore.orders.paymentType"
               :options="[
@@ -85,7 +93,7 @@ console.log("ordersStore", ordersStore.orders);
           </UFormGroup>
           <UFormGroup
             v-if="ordersStore.orders.paymentType === 'money'"
-            label="Troco"
+            label="Troco Para:"
             name="change"
           >
             <UInput
@@ -101,6 +109,9 @@ console.log("ordersStore", ordersStore.orders);
               </template></UInput
             >
           </UFormGroup>
+          <UButton type="submit" block size="lg" class="font-semibold"
+            >Enviar Pedido</UButton
+          >
         </div>
       </UForm>
     </UCard>

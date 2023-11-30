@@ -31,12 +31,7 @@ onMounted(() => {
         <div class="deliver">
           <p class="text-center text-xs">
             Entrega Aproximada: {{ user?.delivery_time }}min -
-            {{
-              user?.delivery_fee.toLocaleString("pt-br", {
-                style: "currency",
-                currency: "BRL",
-              })
-            }}
+            {{ convertToMoneyString(user?.delivery_fee) }}
           </p>
         </div>
       </div>

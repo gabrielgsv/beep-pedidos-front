@@ -34,11 +34,13 @@ watch(
 );
 
 function addAdditionalToSubTotal() {
+  const basePrice = selectedProduct.value?.price || 0;
+  subtotal.value = basePrice;
+  let additionalPrice = 0;
   selectedProduct.value?.additional.forEach((additional) => {
-    subtotal.value = selectedProduct.value?.price || 0;
-    subtotal.value += additional.value * additional.count;
+    additionalPrice += additional.value * additional.count;
   });
-  debugger;
+  subtotal.value += additionalPrice;
 }
 </script>
 

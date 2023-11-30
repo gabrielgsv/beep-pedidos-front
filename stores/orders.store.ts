@@ -46,7 +46,7 @@ export const useOrdersStore = defineStore("orders", {
         total += product.subtotal;
       });
       this.orders = {
-        paymentType: "Cartão de Crédito",
+        paymentType: "",
         name: "",
         phone: "",
         total: total,
