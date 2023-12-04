@@ -2,15 +2,18 @@
 import OrderBag from "~/components/OrderProduct/OrderBag/index.vue";
 import { type UserType } from "./types";
 const route = useRoute();
+const { user } = useOrdersStore();
 
-const user = ref<UserType | null>();
+const userValues = ref<UserType | null>();
 const isLoading = ref(true);
 
 onMounted(() => {
   api()
     .get(`/users/by-url?url=${route.params.url}`)
     .then((res) => {
-      user.value = res.data;
+      userValues.value = res.data;
+      user.user_id = res.data.id;
+      user.delivery_fee = res.data.delivery_fee;
       isLoading.value = false;
     })
     .catch((error) => {
@@ -26,16 +29,16 @@ onMounted(() => {
     <p v-else-if="!user && !isLoading">Estabelecimento não encontrado</p>
     <div v-else class="max-w-3xl">
       <div class="title-container">
-        <img :src="user?.image_url" alt="Logotipo do estabelecimento" />
-        <p class="text-xl font-semibold">{{ user?.name }}</p>
+        <img :src="userValues?.image_url" alt="Logotipo do estabelecimento" />
+        <p class="text-xl font-semibold">{{ userValues?.name }}</p>
         <div class="deliver">
           <p class="text-center text-xs">
-            Entrega Aproximada: {{ user?.delivery_time }}min -
+            Entrega Aproximada: {{ userValues?.delivery_time }}min -
             {{ convertToMoneyString(user?.delivery_fee) }}
           </p>
         </div>
       </div>
-      <OrderProduct v-if="user" :products="user.products" />
+      <OrderProduct v-if="userValues" :products="userValues.products" />
     </div>
   </div>
   <OrderBag />

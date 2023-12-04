@@ -2,8 +2,10 @@
 import AddressForm from "./AddressForm.vue";
 import type { FormSubmitEvent } from "@nuxt/ui/dist/runtime/types";
 import { z } from "zod";
+import { createOrders } from "./services";
 
 const ordersStore = useOrdersStore();
+const toast = useToast();
 
 const isModalOpen = ref(false);
 const isDelivery = ref(true);
@@ -11,12 +13,39 @@ const isDelivery = ref(true);
 const orderSchema = z.object({
   name: z.string().min(1, { message: "Nome obrigatório" }),
   phone: z.string().min(1, { message: "Número do celular obrigatório" }),
-  paymentType: z.string().min(1, { message: "Meio de pagamento obrigatório" }),
+  payment_type: z.string().min(1, { message: "Meio de pagamento obrigatório" }),
 });
 
 function onSubmit(event: FormSubmitEvent<any>) {
-  const { orders, productsOrders } = ordersStore;
-  debugger;
+  const { address, address_number, city } = ordersStore.orders;
+  if (!isDelivery || (isDelivery && address && address_number && city)) {
+    createOrders()
+      .then(() => {
+        toast.add({
+          title: "Sucesso",
+          description: "Seu pedido foi realizado",
+          color: "green",
+          timeout: 8000,
+          icon: "i-heroicons-check-circle",
+        });
+      })
+      .catch(() => {
+        toast.add({
+          title: "Erro",
+          description: "Erro ao realizar o pedido",
+          color: "red",
+          timeout: 8000,
+          icon: "i-heroicons-x-circle",
+        });
+      });
+  } else {
+    toast.add({
+      title: "Erro",
+      description: "Adicione um endereço",
+      color: "red",
+      timeout: 8000,
+    });
+  }
 }
 </script>
 
@@ -76,9 +105,9 @@ function onSubmit(event: FormSubmitEvent<any>) {
               data-maska="['(##) ####-####', '(##) #####-####']"
             />
           </UFormGroup>
-          <UFormGroup label="Meio de pagamento" name="paymentType" required>
+          <UFormGroup label="Meio de pagamento" name="payment_type" required>
             <URadioGroup
-              v-model="ordersStore.orders.paymentType"
+              v-model="ordersStore.orders.payment_type"
               :options="[
                 {
                   value: 'debit',
@@ -96,7 +125,7 @@ function onSubmit(event: FormSubmitEvent<any>) {
             />
           </UFormGroup>
           <UFormGroup
-            v-if="ordersStore.orders.paymentType === 'money'"
+            v-if="ordersStore.orders.payment_type === 'money'"
             label="Troco Para:"
             name="change"
           >

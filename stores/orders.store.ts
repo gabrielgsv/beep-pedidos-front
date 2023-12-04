@@ -13,7 +13,7 @@ type ProductsOrdersType = {
 type OrdersType = {
   name: string;
   phone: string;
-  paymentType: string;
+  payment_type: string;
   total: number;
   change?: string;
   cep?: string;
@@ -25,19 +25,29 @@ type OrdersType = {
   complement?: string;
 };
 
+type UserType = {
+  user_id: number;
+  delivery_fee: number;
+};
+
 export const useOrdersStore = defineStore("orders", {
   state: (): {
     orders: OrdersType;
     productsOrders: ProductsOrdersType[];
+    user: UserType;
   } => ({
     orders: {
-      paymentType: "",
+      payment_type: "",
       name: "",
       phone: "",
       total: 0,
       change: "R$ 0,00",
     },
     productsOrders: [],
+    user: {
+      user_id: 0,
+      delivery_fee: 0,
+    },
   }),
 
   actions: {
@@ -53,7 +63,7 @@ export const useOrdersStore = defineStore("orders", {
         total += product.subtotal;
       });
       this.orders = {
-        paymentType: "",
+        payment_type: "",
         name: "",
         phone: "",
         total: total,
