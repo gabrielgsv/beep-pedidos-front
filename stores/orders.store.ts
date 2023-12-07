@@ -23,11 +23,13 @@ type OrdersType = {
   city?: string;
   state?: string;
   complement?: string;
+  isDelivery: boolean;
 };
 
 type UserType = {
   user_id: number;
   delivery_fee: number;
+  phone: string;
 };
 
 export const useOrdersStore = defineStore("orders", {
@@ -42,11 +44,13 @@ export const useOrdersStore = defineStore("orders", {
       phone: "",
       total: 0,
       change: "R$ 0,00",
+      isDelivery: true,
     },
     productsOrders: [],
     user: {
       user_id: 0,
       delivery_fee: 0,
+      phone: "",
     },
   }),
 
@@ -66,6 +70,7 @@ export const useOrdersStore = defineStore("orders", {
         payment_type: "",
         name: "",
         phone: "",
+        isDelivery: true,
         total: total,
       };
     },

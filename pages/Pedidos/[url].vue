@@ -14,6 +14,7 @@ onMounted(() => {
       userValues.value = res.data;
       user.user_id = res.data.id;
       user.delivery_fee = res.data.delivery_fee;
+      user.phone = res.data.phone;
       isLoading.value = false;
     })
     .catch((error) => {
