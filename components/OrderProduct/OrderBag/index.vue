@@ -2,13 +2,12 @@
 import AddressForm from "./AddressForm.vue";
 import type { FormSubmitEvent } from "@nuxt/ui/dist/runtime/types";
 import { z } from "zod";
-import { createOrders } from "./services";
+import { createOrders, sendWhatsapp } from "./services";
 
 const ordersStore = useOrdersStore();
 const toast = useToast();
 
 const isModalOpen = ref(false);
-const isDelivery = ref(true);
 
 const orderSchema = z.object({
   name: z.string().min(1, { message: "Nome obrigatório" }),
@@ -17,10 +16,11 @@ const orderSchema = z.object({
 });
 
 function onSubmit(event: FormSubmitEvent<any>) {
-  const { address, address_number, city } = ordersStore.orders;
+  const { address, address_number, city, isDelivery } = ordersStore.orders;
   if (!isDelivery || (isDelivery && address && address_number && city)) {
     createOrders()
       .then(() => {
+        sendWhatsapp();
         toast.add({
           title: "Sucesso",
           description: "Seu pedido foi realizado",
@@ -88,8 +88,8 @@ function onSubmit(event: FormSubmitEvent<any>) {
           </div>
           <p class="font-semibold">Entrega e retirada?</p>
           <div class="flex gap-3 items-center">
-            <UToggle v-model="isDelivery" />
-            <p>{{ isDelivery ? "Entrega" : "Retirada" }}</p>
+            <UToggle v-model="ordersStore.orders.isDelivery" />
+            <p>{{ ordersStore.orders.isDelivery ? "Entrega" : "Retirada" }}</p>
           </div>
 
           <AddressForm />
