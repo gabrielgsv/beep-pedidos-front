@@ -5,6 +5,7 @@ export function createOrders() {
     ...orders,
     user_id: user.user_id,
     products_orders: productsOrders,
+    total: orders.isDelivery ? orders.total + user.delivery_fee : orders.total,
   });
 }
 
@@ -27,7 +28,9 @@ export async function sendWhatsapp() {
   )}
   Subtotal:                  ${convertToMoneyString(orders.total)}
   Entrega:                   R$ 10,00
-  Total:                        R$ ${orders.total}
+  Total:                        ${convertToMoneyString(
+    orders.isDelivery ? orders.total + user.delivery_fee : orders.total
+  )}
   
   Pagamento em: ${
     orders.payment_type === "money"

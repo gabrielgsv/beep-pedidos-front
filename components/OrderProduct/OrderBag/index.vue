@@ -80,10 +80,22 @@ function onSubmit(event: FormSubmitEvent<any>) {
           <UButton block variant="soft" @click="isModalOpen = false"
             >Adicionar mais itens</UButton
           >
+          <div class="item" v-if="ordersStore.orders.isDelivery">
+            <p class="font-semibold text-lg">Taxa de entrega</p>
+            <p class="font-semibold text-lg">
+              {{ convertToMoneyString(ordersStore.user.delivery_fee) }}
+            </p>
+          </div>
           <div class="item">
             <p class="font-semibold text-lg">Total</p>
             <p class="font-semibold text-lg">
-              {{ convertToMoneyString(ordersStore.orders.total) }}
+              {{
+                ordersStore.orders.isDelivery
+                  ? convertToMoneyString(
+                      ordersStore.orders.total + ordersStore.user.delivery_fee
+                    )
+                  : convertToMoneyString(ordersStore.orders.total)
+              }}
             </p>
           </div>
           <p class="font-semibold">Entrega e retirada?</p>
