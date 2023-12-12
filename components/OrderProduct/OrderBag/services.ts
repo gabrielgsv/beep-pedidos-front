@@ -34,7 +34,7 @@ export async function sendWhatsapp() {
   
   Pagamento em: ${
     orders.payment_type === "money"
-      ? `Dinheiro - Troca para R$ ${orders.change}`
+      ? `Dinheiro - Troco para R$ ${orders.change}`
       : `Cartão`
   }
   ${orders.isDelivery ? "Entrega: Sim" : "Entrega: Não"}

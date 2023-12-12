@@ -27,6 +27,7 @@ type OrderType = {
 };
 
 const userId = useCookie("userId");
+const isLoading = ref(true);
 const orders = ref<OrderType[]>([]);
 const page = ref(1);
 const pageCount = 5;
@@ -38,8 +39,12 @@ onMounted(() => {
   api()
     .get(`/orders/${userId.value}`)
     .then(({ data }) => {
+      isLoading.value = false;
       orders.value = data as OrderType[];
       totalCount.value = data.length;
+    })
+    .catch(() => {
+      isLoading.value = false;
     });
 });
 </script>
@@ -47,6 +52,7 @@ onMounted(() => {
 <template>
   <div>
     <div class="container">
+      <USkeleton class="h-96 w-64 m-4" v-if="isLoading" v-for="i in 15" />
       <div v-for="(order, index) in orders">
         <UCard
           v-if="index >= initialIndex && index <= finalIndex"
@@ -91,7 +97,7 @@ onMounted(() => {
               Total: {{ convertToMoneyString(order.total) }} -
               {{
                 order.payment_type === "money"
-                  ? `Dinheiro - Troca para R$
+                  ? `Dinheiro - Troco para R$
               ${convertToMoneyString(order.change)}`
                   : `Cartão`
               }}
@@ -102,6 +108,7 @@ onMounted(() => {
     </div>
     <UPagination
       v-model="page"
+      v-if="!isLoading"
       :page-count="pageCount"
       :total="totalCount"
       size="lg"
