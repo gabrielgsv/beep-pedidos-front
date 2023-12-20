@@ -4,9 +4,13 @@ type ProductsOrdersType = {
   price: number;
   subtotal: number;
   additional: {
-    name: string;
-    value: number;
-    count: number;
+    category: string;
+    limit: number;
+    additional: {
+      name: string;
+      value: any;
+      count: number;
+    }[];
   }[];
 };
 
@@ -58,8 +62,10 @@ export const useOrdersStore = defineStore("orders", {
     addProduct(product: ProductsOrdersType) {
       let subtotal: number = product.price;
       let total: number = 0;
-      product.additional.forEach((additional) => {
-        subtotal += additional.value * additional.count;
+      product.additional.forEach((categories) => {
+        categories.additional.forEach((additional) => {
+          subtotal += additional.value * additional.count;
+        });
       });
 
       this.productsOrders.push({ ...product, subtotal });

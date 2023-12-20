@@ -120,7 +120,7 @@ function onSubmit(event: FormSubmitEvent<ProductType>) {
       })
       .catch((error) => error(error));
   } else {
-    createProduct(event.data, props.isEditing)
+    createProduct(event.data, props.isEditing, productId.value)
       .then(() => sucess())
       .catch((error) => error(error));
   }
