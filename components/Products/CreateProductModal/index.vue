@@ -5,19 +5,25 @@ import { getProducts } from "../services";
 import { createProduct, uploadImage } from "./services";
 import convertCurrency from "~/utils/convertCurrency";
 
-type PropsType = {
-  isEditing?: boolean;
-  product?: {
-    id: number;
-    name: string;
-    image_url: string;
-    description: string;
-    price: number;
+type ProductType = {
+  id?: number;
+  name: string;
+  image_url?: string;
+  image?: any;
+  description: string;
+  price: any;
+  additional: {
+    category: string;
+    limit: number;
     additional: {
       name: string;
-      value: number;
+      value: any;
     }[];
-  };
+  }[];
+};
+type PropsType = {
+  isEditing?: boolean;
+  product?: ProductType;
 };
 const props = defineProps<PropsType>();
 
@@ -40,11 +46,10 @@ const productSchema = z.object({
   additional: z.any(),
 });
 
-type ProductType = z.output<typeof productSchema>;
+// type ProductType = z.output<typeof productSchema>;
 
 const productState = reactive<ProductType>({
   name: "",
-  image: "",
   description: "",
   price: "",
   additional: [],
@@ -54,11 +59,16 @@ const productId = ref(props.product?.id);
 
 function onOpenEditing() {
   if (props.isEditing && props.product) {
-    const newAdditionals = props.product.additional.map((additional) => {
-      return {
-        ...additional,
-        value: convertCurrency(additional.value),
-      };
+    const newAdditionals = props.product.additional.map((item) => {
+      return (item = {
+        ...item,
+        additional: item.additional.map((additionalItem) => {
+          return {
+            ...additionalItem,
+            value: convertCurrency(additionalItem.value),
+          };
+        }),
+      });
     });
 
     productState.name = props.product.name;
@@ -88,7 +98,8 @@ function onSubmit(event: FormSubmitEvent<ProductType>) {
     });
   }
 
-  function error() {
+  function error(error: any) {
+    console.error(error);
     isLoading.value = false;
     toast.add({
       title: "Erro",
@@ -105,13 +116,13 @@ function onSubmit(event: FormSubmitEvent<ProductType>) {
         const imageUrl: string = data.data.link;
         createProduct(event.data, props.isEditing, productId.value, imageUrl)
           .then(() => sucess())
-          .catch(() => error());
+          .catch((error) => error(error));
       })
-      .catch(() => error());
+      .catch((error) => error(error));
   } else {
-    createProduct(event.data, props.isEditing)
+    createProduct(event.data, props.isEditing, productId.value)
       .then(() => sucess())
-      .catch(() => error());
+      .catch((error) => error(error));
   }
 }
 
@@ -131,16 +142,23 @@ function onFileChange(event: any) {
 
 function onClose() {
   productState.name = "";
-  productState.image = "";
+  productState.image = undefined;
   productState.description = "";
   productState.price = "";
 
   imagePreview.value = "";
 }
 
-function addAdditional() {
+function addCategoryAdditional() {
   productState.additional = [
     ...productState.additional,
+    { category: "Adicionais", limit: 0, additional: [] },
+  ];
+}
+
+function addAdditional(index: number) {
+  productState.additional[index].additional = [
+    ...productState.additional[index].additional,
     { name: "", value: "" },
   ];
 }
@@ -213,51 +231,104 @@ function addAdditional() {
               <UTextarea class="w-full" v-model="productState.description" />
             </UFormGroup>
 
-            <UFormGroup label="Adicionais">
+            <UFormGroup label="Categoria de Adicionais">
               <div class="additional-container">
                 <div
                   v-for="(i, index) in productState.additional"
-                  class="additional"
                   :key="index"
+                  class="additional-group"
                 >
-                  <UFormGroup
-                    class="w-56"
-                    label="Nome"
-                    name="additional-name"
-                    v-model="i.name"
-                  >
-                    <UInput v-model="i.name" />
-                  </UFormGroup>
-
-                  <UFormGroup
-                    class="w-32"
-                    label="Preço"
-                    name="additional-value"
-                  >
-                    <UInput
-                      v-model="i.value"
-                      v-maska
-                      data-maska="0,99"
-                      data-maska-eager
-                      data-maska-reversed
-                      data-maska-tokens="0:\d:multiple|9:\d:optional"
+                  <div class="additional">
+                    <UFormGroup
+                      class="w-56"
+                      label="Categoria"
+                      name="additional-categories"
+                      v-model="i.category"
                     >
-                      <template #leading>
-                        <span>R$</span>
-                      </template>
-                    </UInput>
-                  </UFormGroup>
+                      <UInput v-model="i.category" />
+                    </UFormGroup>
 
-                  <UButton
-                    icon="i-heroicons-trash"
-                    color="red"
-                    class="rounded-full h-[32px] mt-5"
-                    @click="productState.additional.splice(index, 1)"
-                  />
+                    <UFormGroup
+                      class="w-24"
+                      label="Limte"
+                      name="additional-limit"
+                      v-model="i.limit"
+                      help="Zero significa ilimitado"
+                    >
+                      <UInput v-model="i.limit" v-maska data-maska="###" />
+                    </UFormGroup>
+
+                    <UButton
+                      icon="i-heroicons-trash"
+                      color="red"
+                      class="rounded-full h-[32px] mt-5"
+                      @click="productState.additional.splice(index, 1)"
+                    />
+
+                    <UButton
+                      icon="i-heroicons-plus"
+                      @click="addAdditional(index)"
+                      class="rounded-full h-[32px] mt-5"
+                    >
+                      Adicionais
+                    </UButton>
+                  </div>
+                  <UDivider />
+                  <p class="mt-2 mx-3 text-sm font-semibold">Adicionais:</p>
+                  <div
+                    v-for="(additional, indexAdditional) in i.additional"
+                    class="additional"
+                  >
+                    <UFormGroup
+                      class="w-56"
+                      label="Nome"
+                      name="additional-name"
+                      v-model="additional.name"
+                    >
+                      <UInput v-model="additional.name" />
+                    </UFormGroup>
+
+                    <UFormGroup
+                      class="w-32"
+                      label="Preço"
+                      name="additional-value"
+                    >
+                      <UInput
+                        v-model="additional.value"
+                        v-maska
+                        data-maska="0,99"
+                        data-maska-eager
+                        data-maska-reversed
+                        data-maska-tokens="0:\d:multiple|9:\d:optional"
+                      >
+                        <template #leading>
+                          <span>R$</span>
+                        </template>
+                      </UInput>
+                    </UFormGroup>
+
+                    <UButton
+                      icon="i-heroicons-trash"
+                      color="red"
+                      class="rounded-full h-[32px] mt-5"
+                      @click="
+                        productState.additional[index].additional.splice(
+                          indexAdditional,
+                          1
+                        )
+                      "
+                    />
+                  </div>
                 </div>
               </div>
 
-              <UButton icon="i-heroicons-plus" @click="addAdditional" />
+              <UButton
+                icon="i-heroicons-plus"
+                @click="addCategoryAdditional"
+                class="mt-5"
+              >
+                Adicionar Categoria
+              </UButton>
             </UFormGroup>
           </div>
           <div class="buttons">
@@ -318,9 +389,12 @@ img {
   border: 3px solid #3b82f6;
   border-radius: 5px;
 }
-
+.additional-group {
+  border: 1px solid #d1d5db;
+  border-radius: 7px;
+}
 .additional-container {
-  max-height: 210px;
+  max-height: 500px;
   overflow-y: auto;
   padding-right: 10px;
 }
@@ -337,7 +411,8 @@ img {
 .additional {
   display: flex;
   gap: 20px;
-  margin-bottom: 10px;
+  margin: 5px;
+  padding: 5px;
 }
 
 .buttons {

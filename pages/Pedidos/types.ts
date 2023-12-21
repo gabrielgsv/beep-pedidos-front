@@ -26,9 +26,13 @@ export type ProductsType = {
   description: string;
   price: number;
   additional: {
-    name: string;
-    value: number;
-    count: number;
+    category: string;
+    limit: number;
+    additional: {
+      name: string;
+      value: any;
+      count: number;
+    }[];
   }[];
   user_id: number;
 };

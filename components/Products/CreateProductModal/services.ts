@@ -1,14 +1,19 @@
-type ProductType = {
-  name: string;
-  description: string;
-  price: string;
-  image?: any;
-  additional?: any;
+type AdditionalType = {
+  category: string;
+  limit: number;
+  additional: {
+    name: string;
+    value: any;
+  }[];
 };
 
-type AdditionalType = {
+type ProductType = {
   name: string;
-  value: any;
+  image_url?: string;
+  image?: any;
+  description: string;
+  price: any;
+  additional: AdditionalType[];
 };
 
 export function createProduct(
@@ -18,13 +23,18 @@ export function createProduct(
   imageUrl?: string
 ) {
   const userId = useCookie("userId");
-  let newAdditionals: AdditionalType[] = product.additional;
+  let newAdditionals = product.additional;
   if (newAdditionals.length > 0) {
-    newAdditionals = newAdditionals.map((item) => {
-      return {
-        ...item,
-        value: parseFloat(item.value.replace(",", ".")),
-      };
+    newAdditionals = newAdditionals.map((additionalCategory) => {
+      additionalCategory.additional = additionalCategory.additional.map(
+        (item) => {
+          return {
+            ...item,
+            value: parseFloat(item.value.replace(",", ".")),
+          };
+        }
+      );
+      return additionalCategory;
     });
   }
 

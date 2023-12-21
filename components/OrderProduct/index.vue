@@ -8,9 +8,13 @@ type ProductsType = {
   description: string;
   price: number;
   additional: {
-    name: string;
-    value: number;
-    count: number;
+    category: string;
+    limit: number;
+    additional: {
+      name: string;
+      value: any;
+      count: number;
+    }[];
   }[];
   user_id: number;
 };
@@ -41,12 +45,32 @@ watch(
   }
 );
 
+type CategoriesType = {
+  category: string;
+  limit: number;
+  additional: {
+    name: string;
+    value: any;
+    count: number;
+  }[];
+};
+const compareCategoryLimit = computed(() => (categories: CategoriesType) => {
+  if (categories.limit === 0) return false;
+
+  const isOverLimit: boolean =
+    categories.additional.reduce((total, item) => total + item.count, 0) >=
+    categories.limit;
+  return isOverLimit;
+});
+
 function addAdditionalToSubTotal() {
   const basePrice = selectedProduct.value?.price || 0;
   subtotal.value = basePrice;
   let additionalPrice = 0;
   selectedProduct.value?.additional.forEach((additional) => {
-    additionalPrice += additional.value * additional.count;
+    additional.additional.forEach((item) => {
+      additionalPrice += item.value * item.count;
+    });
   });
   subtotal.value += additionalPrice;
 }
@@ -82,6 +106,7 @@ function addAdditionalToSubTotal() {
       </div>
       <div class="w-1/3">
         <img
+          v-if="product?.image_url && product.image_url.length > 0"
           class="rounded-xl"
           :src="product?.image_url"
           alt="Imagem do produto"
@@ -106,6 +131,9 @@ function addAdditionalToSubTotal() {
 
         <div class="modal-content">
           <img
+            v-if="
+              selectedProduct?.image_url && selectedProduct.image_url.length > 0
+            "
             class="rounded-xl h-40"
             :src="selectedProduct?.image_url"
             alt="Imagem do produto"
@@ -114,11 +142,23 @@ function addAdditionalToSubTotal() {
           <p class="self-start mt-5">
             {{ convertToMoneyString(selectedProduct?.price) }}
           </p>
-          <div class="w-full" v-for="additional in selectedProduct?.additional">
+          <div class="w-full" v-for="categories in selectedProduct?.additional">
             <UDivider class="my-2" />
-            <div class="flex justify-between w-full px-5 py-4">
+            <p class="font-semibold">
+              {{ categories.category }}
+              <span class="text-sm font-normal">
+                -
+                {{
+                  categories.limit > 0 ? `Escolha até: ${categories.limit}` : ""
+                }}</span
+              >
+            </p>
+            <div
+              v-for="additional in categories.additional"
+              class="flex justify-between w-full px-5 py-4"
+            >
               <div>
-                <p class="font-bold">{{ additional.name }}</p>
+                <p>{{ additional.name }}</p>
                 <p>{{ convertToMoneyString(additional.value) }}</p>
               </div>
               <div class="additional-count">
@@ -130,23 +170,36 @@ function addAdditionalToSubTotal() {
                   variant="ghost"
                   @click="
                     () => {
-                      additional.count--;
+                      if (additional?.count) {
+                        additional.count--;
+                      } else {
+                        additional.count = 0;
+                      }
                       addAdditionalToSubTotal();
                     }
                   "
                 />
                 {{ additional.count }}
-                <UButton
-                  class="rounded-full"
-                  icon="i-heroicons-plus"
-                  variant="ghost"
-                  @click="
-                    () => {
-                      additional.count++;
-                      addAdditionalToSubTotal();
-                    }
-                  "
-                />
+                <div class="w-4">
+                  <UButton
+                    v-if="!additional.count || additional.count === 0"
+                    class="rounded-full"
+                    icon="i-heroicons-plus"
+                    variant="ghost"
+                    :disabled="compareCategoryLimit(categories)"
+                    :color="compareCategoryLimit(categories) ? 'gray' : 'green'"
+                    @click="
+                      () => {
+                        if (additional?.count) {
+                          additional.count++;
+                        } else {
+                          additional.count = 1;
+                        }
+                        addAdditionalToSubTotal();
+                      }
+                    "
+                  />
+                </div>
               </div>
             </div>
           </div>
