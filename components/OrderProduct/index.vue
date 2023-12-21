@@ -45,6 +45,24 @@ watch(
   }
 );
 
+type CategoriesType = {
+  category: string;
+  limit: number;
+  additional: {
+    name: string;
+    value: any;
+    count: number;
+  }[];
+};
+const compareCategoryLimit = computed(() => (categories: CategoriesType) => {
+  if (categories.limit === 0) return false;
+
+  const isOverLimit: boolean =
+    categories.additional.reduce((total, item) => total + item.count, 0) >=
+    categories.limit;
+  return isOverLimit;
+});
+
 function addAdditionalToSubTotal() {
   const basePrice = selectedProduct.value?.price || 0;
   subtotal.value = basePrice;
@@ -126,13 +144,21 @@ function addAdditionalToSubTotal() {
           </p>
           <div class="w-full" v-for="categories in selectedProduct?.additional">
             <UDivider class="my-2" />
-            <p>{{ categories.category }}</p>
+            <p class="font-semibold">
+              {{ categories.category }}
+              <span class="text-sm font-normal">
+                -
+                {{
+                  categories.limit > 0 ? `Escolha até: ${categories.limit}` : ""
+                }}</span
+              >
+            </p>
             <div
               v-for="additional in categories.additional"
               class="flex justify-between w-full px-5 py-4"
             >
               <div>
-                <p class="font-bold">{{ additional.name }}</p>
+                <p>{{ additional.name }}</p>
                 <p>{{ convertToMoneyString(additional.value) }}</p>
               </div>
               <div class="additional-count">
@@ -154,22 +180,26 @@ function addAdditionalToSubTotal() {
                   "
                 />
                 {{ additional.count }}
-                <UButton
-                  v-if="!additional.count || additional.count === 0"
-                  class="rounded-full"
-                  icon="i-heroicons-plus"
-                  variant="ghost"
-                  @click="
-                    () => {
-                      if (additional?.count) {
-                        additional.count++;
-                      } else {
-                        additional.count = 1;
+                <div class="w-4">
+                  <UButton
+                    v-if="!additional.count || additional.count === 0"
+                    class="rounded-full"
+                    icon="i-heroicons-plus"
+                    variant="ghost"
+                    :disabled="compareCategoryLimit(categories)"
+                    :color="compareCategoryLimit(categories) ? 'gray' : 'green'"
+                    @click="
+                      () => {
+                        if (additional?.count) {
+                          additional.count++;
+                        } else {
+                          additional.count = 1;
+                        }
+                        addAdditionalToSubTotal();
                       }
-                      addAdditionalToSubTotal();
-                    }
-                  "
-                />
+                    "
+                  />
+                </div>
               </div>
             </div>
           </div>

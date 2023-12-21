@@ -12,6 +12,14 @@ onMounted(() => {
     .get(`/users/by-url?url=${route.params.url}`)
     .then((res) => {
       userValues.value = res.data;
+      userValues.value?.products.map((product) => {
+        product.additional.map((add) => {
+          add.limit = Number(add.limit);
+          add.additional.map((item) => {
+            item.count = 0;
+          });
+        });
+      });
       user.user_id = res.data.id;
       user.delivery_fee = res.data.delivery_fee;
       user.phone = res.data.phone;
