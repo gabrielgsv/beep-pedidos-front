@@ -9,6 +9,7 @@ export default defineNuxtConfig({
     "@nuxtjs/color-mode",
     "@pinia/nuxt",
     "@nuxtjs/google-fonts",
+    "@nuxt/image"
   ],
   googleFonts: {
     families: {
@@ -21,4 +22,5 @@ export default defineNuxtConfig({
     },
   },
   css: ["@/assets/main.css"],
+  plugins: [{ src: "~/plugins/lottie", mode: "client" }],
 });

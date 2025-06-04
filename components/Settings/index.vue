@@ -193,6 +193,15 @@ function onFileChange(event: any) {
     @submit="onSubmit"
     v-else
   >
+    <div v-if="settingState.url.length > 0" class="w-full flex justify-center">
+      <p>Site:</p>
+      <a
+        :href="`http://${useRequestURL().host}/pedidos/${settingState.url}`"
+        target="_blank"
+        class="text-blue-600 ml-2 underline"
+        >{{ `http://${useRequestURL().host}/pedidos/${settingState.url}` }}</a
+      >
+    </div>
     <div class="form-container">
       <UFormGroup label="Nome" name="name" class="w-72">
         <UInput v-model="settingState.name" />

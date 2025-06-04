@@ -11,6 +11,7 @@
   },
   "devDependencies": {
     "@nuxt/devtools": "latest",
+    "@nuxt/image": "^1.7.0",
     "@nuxtjs/color-mode": "^3.3.0",
     "@nuxtjs/google-fonts": "^3.1.0",
     "nuxt": "^3.8.1",
@@ -23,6 +24,7 @@
     "axios": "^1.6.1",
     "maska": "^2.1.10",
     "pinia": "^2.1.7",
+    "vue3-lottie": "^3.3.0",
     "zod": "^3.22.4"
   }
 }
